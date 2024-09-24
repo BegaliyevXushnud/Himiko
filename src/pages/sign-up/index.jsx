@@ -16,21 +16,21 @@ const SignUp = () => {
         password: "",
     };
     const handleSubmit = async (values) => {
-        console.log(values); // Ma'lumotlarni tekshirish uchun
+        console.log(values); 
         try {
             const response = await auth.sign_up(values);
             if (response.status === 201) {
                 navigate("/");
             }
         } catch (error) {
-            console.log(error.response); // Xatolik haqida batafsil ma'lumotni ko'rsatish
+            console.log(error.response); 
         }
     };
     
 
     const onFinish = (values) => {
         console.log('Received values of form: ', values);
-        handleSubmit(values); // handleSubmit funksiyasini shu yerda chaqirish kerak
+        handleSubmit(values); 
     };
 
     return (
@@ -45,8 +45,8 @@ const SignUp = () => {
                             <h1 className='font-mono text-[28px] mb-8'>Register</h1>
                             <Form
                                 name="login"
-                                initialValues={{ remember: true }}
-                                onFinish={onFinish} // Faqat onFinish ishlatiladi
+                                initialValues={initialValues}
+                                onFinish={onFinish} 
                             >
                                 <Form.Item
                                     name="first_name"
@@ -116,18 +116,17 @@ const SignUp = () => {
                                 <Form.Item>
                                     <Flex justify="space-between" align="center">
                                         <Form.Item name="remember" valuePropName="checked" noStyle>
-                                            <Checkbox>Remember me</Checkbox>
                                         </Form.Item>
-                                        <a href="">Forgot password</a>
+                                        
                                     </Flex>
                                 </Form.Item>
 
                                 <Form.Item className='text-[#000000c4]'>
-                                    <Button block type="primary" htmlType="submit" className='bg-[#d45b07] text-white'>
+                                    <Button block type="success" htmlType="submit" className='bg-[#d45b07] text-white p-8 text-[17px]'>
                                         Register
                                     </Button>
-                                    <div className="text-center mt-2">
-                                        Don't have an account? 
+                                    <div className="text-center mt-2 p-2">
+                                    Do you have an account 
                                         <a onClick={() => navigate("/")} className='text-[black]'>Login</a>
                                     </div>
                                 </Form.Item>
