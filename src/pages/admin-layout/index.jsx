@@ -3,7 +3,7 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 import { NavLink, useLocation,Outlet } from 'react-router-dom';
 import admin from "../../router/routes";
-import LogoImg from "../../assets/h.png"; // Logo rasmi
+import LogoImg from "../../assets/h.png"; 
 const { Header, Sider, Content } = Layout;
 
 const Admin = () => {
@@ -15,12 +15,13 @@ const Admin = () => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+
   useEffect(() => {
     let index = admin.findIndex((item) => item.path === pathname);
-    if (index !== -1) {
-      setSelectedKeys(index.toString());
-    }
-  }, [pathname]);
+   if(index !== -1){
+    setSelectedKeys(index.toString());
+   }
+  }, [ pathname]);
 
   return (
     <Layout>
@@ -29,7 +30,7 @@ const Admin = () => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={[selectedKeys]}
+          selectedKeys={[selectedKeys]}
           items={admin.map((item, index) => (
             {
               key: index.toString(),
@@ -56,7 +57,7 @@ const Admin = () => {
           ))}
         />
       </Sider>
-      <Layout>
+      <Layout >
         <Header
           style={{
             padding: 0,
@@ -74,7 +75,8 @@ const Admin = () => {
             }}
           />
         </Header>
-        <Outlet
+       <div className='p-3'>
+       <Outlet 
           style={{
             margin: '24px 16px',
             padding: 24,
@@ -85,6 +87,7 @@ const Admin = () => {
         >
          
         </Outlet>
+       </div>
       </Layout>
     </Layout>
   );
