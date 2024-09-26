@@ -53,7 +53,7 @@ const SignIn = () => {
                                     name="phone_number"
                                     rules={[{ required: true, message: 'Please input your Phone number!' }]}
                                 >
-                                    <Input prefix={<UserOutlined className='text-[17px] text-[grey]' />} placeholder="+998 90 021 06 06" className='w-full h-[55px]' />
+                                    <Input prefix={<UserOutlined className='text-[17px] text-[grey]' />} placeholder="+998 99 006 06 06" className='w-full h-[55px]' />
                                 </Form.Item>
                                 <Form.Item
                                     name="password"
