@@ -1,25 +1,44 @@
 import React, { useState, useEffect } from 'react';
-import { Button, message, Popconfirm, Pagination } from 'antd';  
+import { Button, message, Input, Table } from 'antd';
 import { category } from '../../../service';
-import { GlobalTable } from '@component'; 
-import CategoryModal from '../../component/modal';
-import { useNavigate } from 'react-router-dom';  
+import { useNavigate, useLocation } from 'react-router-dom';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import CategoryModal from '@modals';
+import { GlobalPopconfirm } from '../../component'; // Adjust the import path as necessary
+import './index.css';
+
+const { Search } = Input;
 
 const Category = () => {
-    const [data, setData] = useState([]);  
+    const [data, setData] = useState([]);
     const [open, setOpen] = useState(false);
     const [update, setUpdate] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);  
-    const [totalItems, setTotalItems] = useState(0); 
-    const navigate = useNavigate();  
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
 
-    
-    const getData = async (page = 1, limit = 10) => {
+    const navigate = useNavigate();
+    const { search } = useLocation();
+
+    const getQueryParams = () => {
+        const params = new URLSearchParams(search);
+        const page = params.get('page') ? parseInt(params.get('page')) : 1;
+        const limit = params.get('limit') ? parseInt(params.get('limit')) : 10;
+        return { page, limit };
+    };
+
+    const getData = async (page = 1, limit = 10, query = '') => {
         try {
-            const res = await category.get({ params: { page, limit } });
+            const res = await category.get({
+                params: { 
+                    page, 
+                    limit, 
+                    search: query 
+                },
+            });
             setData(res?.data?.data?.categories || []);
-            setTotalItems(res?.data?.data?.total || 0);  
+            setTotalItems(res?.data?.data?.total || 0);
         } catch (err) {
             console.error(err);
         }
@@ -29,17 +48,20 @@ const Category = () => {
         const access_token = localStorage.getItem('access_token');
         if (!access_token) {
             console.error("Access token topilmadi! Bosh sahifaga yo'naltirilmoqda...");
-            navigate("/");  
+            navigate("/");
         } else {
-            getData(currentPage, pageSize);  
+            const { page, limit } = getQueryParams();
+            setCurrentPage(page);
+            setPageSize(limit);
+            getData(page, limit, searchQuery);
         }
-    }, [navigate, currentPage, pageSize]);
+    }, [navigate, search, searchQuery]);
 
     const handleDelete = async (id) => {
         try {
             await category.delete(id);
             message.success("Category muvaffaqiyatli o'chirildi");
-            getData(currentPage, pageSize);  
+            getData(currentPage, pageSize, searchQuery);
         } catch (error) {
             console.error(error);
             message.error("Categoryni o'chirishda xatolik yuz berdi");
@@ -48,34 +70,32 @@ const Category = () => {
 
     const editItem = (item) => {
         setUpdate(item);
-        setOpen(true); 
+        setOpen(true);
     };
 
     const columns = [
         {
-            title: 'T/R',
-            dataIndex: 'T/R',
-            render: (text, item, index) => (currentPage - 1) * pageSize + index + 1,  
+            title: '№',
+            dataIndex: 'index',
+            render: (text, item, index) => (currentPage - 1) * pageSize + index + 1,
         },
         {
-            title: 'Name',
+            title: 'Category name',
             dataIndex: 'name',
-            render: (text, item) => <a onClick={() => editItem(item)}>{text}</a>,  
+            render: (text, item) => <a onClick={() => editItem(item)}>{text}</a>,
         },
         {
             title: 'Action',
             dataIndex: 'action',
             render: (text, item) => (
-                <div>
-                    <Button type="link" onClick={() => editItem(item)}>Edit</Button>
-                    <Popconfirm
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <Button type="link" icon={<EditOutlined />} onClick={() => editItem(item)} />
+                    <GlobalPopconfirm
                         title="Categoryni o'chirishni tasdiqlaysizmi?"
                         onConfirm={() => handleDelete(item.id)}
-                        okText="Yes"
-                        cancelText="No"
                     >
-                        <Button type="link" danger>Delete</Button>
-                    </Popconfirm>
+                        <Button type="link" danger icon={<DeleteOutlined />} />
+                    </GlobalPopconfirm>
                 </div>
             ),
         },
@@ -83,31 +103,58 @@ const Category = () => {
 
     const handleCancel = () => {
         setOpen(false);
-        setUpdate(null);  
+        setUpdate(null);
     };
 
-    
     const handlePageChange = (page, pageSize) => {
         setCurrentPage(page);
         setPageSize(pageSize);
+        const current_params = new URLSearchParams(search);
+        current_params.set('page', `${page}`);
+        current_params.set('limit', `${pageSize}`);
+        navigate(`?${current_params}`);
+        getData(page, pageSize, searchQuery);
+    };
+
+    const onSearch = (value) => {
+        setSearchQuery(value);
+        getData(currentPage, pageSize, value);
+    };
+
+    const refreshData = () => {
+        getData(currentPage, pageSize, searchQuery);
     };
 
     return (
         <div>
-            <h1>Categories</h1>
-            <Button type="default" onClick={() => setOpen(true)}>Open Modal</Button>
-            <CategoryModal open={open} handleCancel={handleCancel} category={update} refreshData={() => getData(currentPage, pageSize)} />
-            <GlobalTable 
-                columns={columns} 
-                data={data} 
+            <div className="header-container">
+                <Search
+                    className="search-input"
+                    placeholder="Search category..."
+                    onSearch={onSearch}
+                    allowClear
+                />
+                <Button className="add-btn" type="primary" onClick={() => setOpen(true)}>Add New Category</Button>
+            </div>
+            <Table
+                columns={columns}
+                dataSource={data}
                 pagination={{
                     current: currentPage,
                     pageSize: pageSize,
                     total: totalItems,
                     onChange: handlePageChange,
                     showSizeChanger: true,
-                    pageSizeOptions: [2, 5, 7, 10]
+                    pageSizeOptions: [2, 5, 7, 10],
                 }}
+                rowKey={(item) => item.id}
+            />
+            
+            <CategoryModal
+                open={open}
+                handleCancel={handleCancel}
+                category={update}
+                refreshData={refreshData}
             />
         </div>
     );

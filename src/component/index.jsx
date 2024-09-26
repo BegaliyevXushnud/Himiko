@@ -1,5 +1,5 @@
 
 import GlobalTable from "./global-table"
+import GlobalPopconfirm from './globalpopconfirm'
 
-
-export {GlobalTable}
+export {GlobalTable,GlobalPopconfirm }

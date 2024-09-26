@@ -1,95 +1,157 @@
 import React, { useState, useEffect } from 'react';
-import { Button, message, Popconfirm } from 'antd';  
-import Brand from '../../../service/brand'; 
-import { GlobalTable } from '@component';
-import BrandModal from '../../component/modal';
-import { useNavigate } from 'react-router-dom'; 
+import { Button, message, Input, Table } from 'antd';
+import { brandService } from '../../../service'; 
+import { useNavigate, useLocation } from 'react-router-dom';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import BrandModal from '../../component/modal/brandmodal'; // Adjust the import path as necessary
+import { GlobalPopconfirm } from '../../component'; // Adjust the import path as necessary
+// import './index.css';
 
-const Brands = () => {
-  const [data, setData] = useState([]);  
-  const [open, setOpen] = useState(false);
-  const [update, setUpdate] = useState({});
-  const navigate = useNavigate(); 
+const { Search } = Input;
 
-  const getData = async () => {
-    try {
-      const res = await Brand.get();
-      setData(res.data.data.brands); 
-    } catch (err) {
-      console.error(err);
-      message.error("Failed to fetch brands");
-    }
-  };
+const Brand = () => {
+    const [data, setData] = useState([]);
+    const [open, setOpen] = useState(false);
+    const [update, setUpdate] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
+    const [totalItems, setTotalItems] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    const access_token = localStorage.getItem('access_token');
-    if (!access_token) {
-      console.error("Access token not found! Redirecting to home page...");
-      navigate("/");  
-    } else {
-      getData();  
-    }
-  }, [navigate]);
+    const navigate = useNavigate();
+    const { search } = useLocation();
 
-  const handleDelete = async (id) => {
-    try {
-      await Brand.delete(id);
-      message.success("Brand deleted successfully");
-      getData();  
-    } catch (error) {
-      console.error(error);
-      message.error("Failed to delete brand");
-    }
-  };
+    const getQueryParams = () => {
+        const params = new URLSearchParams(search);
+        const page = params.get('page') ? parseInt(params.get('page')) : 1;
+        const limit = params.get('limit') ? parseInt(params.get('limit')) : 10;
+        return { page, limit };
+    };
 
-  const editItem = (item) => {
-    setUpdate(item);
-    setOpen(true);
-  };
+    const getData = async (page = 1, limit = 10, query = '') => {
+        try {
+            const res = await brandService.get({ params: { page, limit, search: query } });
+            setData(res?.data?.data?.brands || []);
+            setTotalItems(res?.data?.data?.total || 0);
+        } catch (err) {
+            console.error(err);
+        }
+    };
 
-  const columns = [
-    {
-      title: 'T/R',
-      dataIndex: 'T/R',
-      render: (text, item, index) => index + 1,  
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      render: (text, item) => <a onClick={() => editItem(item)}>{text}</a>,  
-    },
-    {
-      title: 'Action',
-      dataIndex: 'action',
-      render: (text, item) => (
+    useEffect(() => {
+        const access_token = localStorage.getItem('access_token');
+        if (!access_token) {
+            console.error("Access token not found! Redirecting to home...");
+            navigate("/");
+        } else {
+            const { page, limit } = getQueryParams();
+            setCurrentPage(page);
+            setPageSize(limit);
+            getData(page, limit, searchQuery);
+        }
+    }, [navigate, search, searchQuery]);
+
+    const handleDelete = async (id) => {
+        try {
+            await brandService.delete(id);
+            message.success("Brand successfully deleted");
+            getData(currentPage, pageSize, searchQuery);
+        } catch (error) {
+            console.error(error);
+            message.error("Error deleting the brand");
+        }
+    };
+
+    const editItem = (item) => {
+        setUpdate(item);
+        setOpen(true);
+    };
+
+    const columns = [
+        {
+            title: '№',
+            dataIndex: 'index',
+            render: (text, item, index) => (currentPage - 1) * pageSize + index + 1,
+        },
+        {
+            title: 'Brand Name',
+            dataIndex: 'name',
+            render: (text, item) => <a onClick={() => editItem(item)}>{text}</a>,
+        },
+        {
+            title: 'Action',
+            dataIndex: 'action',
+            render: (text, item) => (
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <Button type="link" icon={<EditOutlined />} onClick={() => editItem(item)} />
+                    <GlobalPopconfirm
+                        title="Are you sure you want to delete this brand?"
+                        onConfirm={() => handleDelete(item.id)}
+                    >
+                        <Button type="link" danger icon={<DeleteOutlined />} />
+                    </GlobalPopconfirm>
+                </div>
+            ),
+        },
+    ];
+
+    const handleCancel = () => {
+        setOpen(false);
+        setUpdate(null);
+    };
+
+    const handlePageChange = (page, pageSize) => {
+        setCurrentPage(page);
+        setPageSize(pageSize);
+        const current_params = new URLSearchParams(search);
+        current_params.set('page', `${page}`);
+        current_params.set('limit', `${pageSize}`);
+        navigate(`?${current_params}`);
+        getData(page, pageSize, searchQuery);
+    };
+
+    const onSearch = (value) => {
+        setSearchQuery(value);
+        getData(currentPage, pageSize, value);
+    };
+
+    const refreshData = () => {
+        getData(currentPage, pageSize, searchQuery);
+    };
+
+    return (
         <div>
-          <Button type="link" onClick={() => editItem(item)}>Edit</Button>
-          <Popconfirm
-            title="Are you sure to delete?"
-            onConfirm={() => handleDelete(item.id)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" danger>Delete</Button>
-          </Popconfirm>
+            <div className="header-container">
+                <Search
+                    className="search-input"
+                    placeholder="Search brand..."
+                    onSearch={onSearch}
+                    allowClear
+                />
+                <Button className="add-btn" type="primary" onClick={() => setOpen(true)}>Add New Brand</Button>
+            </div>
+            <Table
+                columns={columns}
+                dataSource={data}
+                pagination={{
+                    current: currentPage,
+                    pageSize: pageSize,
+                    total: totalItems,
+                    onChange: handlePageChange,
+                    showSizeChanger: true,
+                    pageSizeOptions: [2, 5, 7, 10],
+                }}
+                rowKey={(item) => item.id}
+            />
+            
+            <BrandModal
+                open={open}
+                handleCancel={handleCancel}
+                brand={update}
+                refreshData={refreshData}
+            />
         </div>
-      ),
-    },
-  ];
-
-  const handleCancel = () => {
-    setOpen(false);
-    setUpdate({});  
-  };
-
-  return (
-    <div>
-      <h1>Brands</h1>
-      <Button type="default" onClick={() => setOpen(true)}>Open Modal</Button>
-      <BrandModal open={open} handleCancel={handleCancel} brand={update} />
-      <GlobalTable columns={columns} data={data} />
-    </div>
-  );
+    );
 };
 
-export default Brands;
+export default Brand;

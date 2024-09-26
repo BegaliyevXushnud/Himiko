@@ -1,0 +1,35 @@
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+/* Ish stoli uchun qidiruv maydonining kengligini belgilash */
+.search-input {
+    width: 300px; /* Ish stoli uchun kengligi 300px */
+    display: inline-block;
+}
+
+/* Qo'shimcha uslublar */
+.add-btn {
+    white-space: nowrap;
+}
+
+/* Responsiv uslublar iPad va mobil qurilmalar uchun */
+@media (max-width: 1024px) {
+    .header-container {
+        flex-direction: column; /* Kichik ekranlarda vertikal joylashuv */
+        align-items: flex-start; /* O'ngdan chapga joylashuv */
+    }
+
+    .search-input {
+        width: 100%; /* Kichik ekranlarda to'liq kenglik */
+    }
+
+    .add-btn {
+        width: 100%; /* Kichik ekranlarda to'liq kenglik */
+        margin-top: 10px; /* O'rta joylashuv uchun oraliq */
+    }
+}
