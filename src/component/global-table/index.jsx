@@ -1,5 +1,15 @@
 import React from 'react';
-import { Space, Table, Tag } from 'antd';
- 
-const Index = ({columns,data }) => <Table columns={columns} dataSource={data} />;
+import { Table } from 'antd';
+
+const Index = ({ columns, data, pagination, handleChange }) => (
+    <Table
+    columns={columns}
+    dataSource={data?.map((item, index) => ({ ...item, key: item.id || index }))}  
+    pagination={pagination}
+    onChange={handleChange}
+    bordered
+/>
+
+);
+
 export default Index;
