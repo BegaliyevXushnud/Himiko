@@ -1,81 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { Button, message, Popconfirm } from 'antd';  
-import { product } from '../../../service';  
-import { GlobalTable } from '@component';
-import ProductModal from '@modals';  
-import { useNavigate, useLocation } from 'react-router-dom';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons'; 
+import { productService } from '../../../service';  
+import { GlobalTable } from '@component'; 
+import ProductModal from '../../component/modal';  
+import { useNavigate } from 'react-router-dom';  
 
 const Product = () => {
     const [data, setData] = useState([]);  
     const [open, setOpen] = useState(false);
-    const [update, setUpdate] = useState({});
-    const [params, setParams] = useState({ page: 1, limit: 3 });
-    const navigate = useNavigate();
-    const location = useLocation(); 
+    const [update, setUpdate] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);  
+    const [totalItems, setTotalItems] = useState(0); 
+    const navigate = useNavigate();  
 
-    const getData = async () => {
+    const getData = async (page = 1, limit = 10) => {
         try {
-            const res = await product.get(params); 
-            setData(res?.data?.data?.products);  
+            const res = await productService.get({ params: { page, limit } });
+            setData(res?.data?.data?.products || []);  
+            setTotalItems(res?.data?.data?.total || 0);  
         } catch (err) {
             console.error(err);
         }
     };
 
     useEffect(() => {
-        const searchParams = new URLSearchParams(location.search);
-        const page = Number(searchParams.get("page")) || 1;
-        const limit = Number(searchParams.get("limit")) || 3;
-        
-        setParams({
-            page,
-            limit
-        });
-    }, [location.search]);
-
-    useEffect(() => {
-        getData();
-    }, [params]);
-
-    const handleTableChange = (pagination) => {
-        const { current = 1, pageSize = 10 } = pagination;
-        
-        setParams((prev) => ({
-            ...prev,
-            page: current,
-            limit: pageSize,
-        }));
-    
-        const searchParams = new URLSearchParams(location.search);
-        searchParams.set("page", current);
-        searchParams.set("limit", pageSize);
-    
-        navigate(`?${searchParams.toString()}`);  
-    };
-    
-    useEffect(() => {
         const access_token = localStorage.getItem('access_token');
         if (!access_token) {
-            console.error("Access token not found! Redirecting to home page...");
+            console.error("Access token topilmadi! Bosh sahifaga yo'naltirilmoqda...");
             navigate("/");  
         } else {
-            getData();  
+            getData(currentPage, pageSize);  
         }
-    }, [navigate]);
+    }, [navigate, currentPage, pageSize]);
 
     const handleDelete = async (id) => {
         try {
-            await product.delete(id);  
-            message.success("Product deleted successfully");
-            getData();  
+            await productService.delete(id);  
+            message.success("Product muvaffaqiyatli o'chirildi");
+            getData(currentPage, pageSize);  
         } catch (error) {
             console.error(error);
-            message.error("Failed to delete product");
+            message.error("Productni o'chirishda xatolik yuz berdi");
         }
     };
 
     const editItem = (item) => {
-        setUpdate(item);
+        setUpdate(item);  
         setOpen(true);  
     };
 
@@ -83,62 +55,62 @@ const Product = () => {
         {
             title: 'T/R',
             dataIndex: 'T/R',
-            render: (text, item, index) => index + 1,  
-            key: 'index',  
+            render: (text, item, index) => (currentPage - 1) * pageSize + index + 1,  
         },
         {
-            title: 'Name',
+            title: 'Product Name',
             dataIndex: 'name',
             render: (text, item) => <a onClick={() => editItem(item)}>{text}</a>,  
-            key: 'name', 
         },
         {
             title: 'Price',
-            dataIndex: 'price',
-            key: 'price', 
+            dataIndex: 'price',  
         },
         {
             title: 'Action',
             dataIndex: 'action',
             render: (text, item) => (
                 <div>
-                    <Button type="link" onClick={() => editItem(item)}>Edit</Button>
+                    <Button type="link" icon={<EditOutlined />} onClick={() => editItem(item)} />
                     <Popconfirm
-                        title="Are you sure to delete?"
+                        title="Mahsulotni o'chirishni tasdiqlaysizmi?"
                         onConfirm={() => handleDelete(item.id)}
                         okText="Yes"
                         cancelText="No"
                     >
-                        <Button type="link" danger>Delete</Button>
+                        <Button type="link" danger icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </div>
             ),
-            key: 'action',  
         },
     ];
 
     const handleCancel = () => {
         setOpen(false);
-        setUpdate({});  
+        setUpdate(null);  
+    };
+
+    const handlePageChange = (page, pageSize) => {
+        setCurrentPage(page);
+        setPageSize(pageSize);
     };
 
     return (
         <div>
             <h1>Products</h1>
             <Button type="default" onClick={() => setOpen(true)}>Open Modal</Button>
-            <ProductModal open={open} handleCancel={handleCancel} product={update} />
+            <ProductModal open={open} handleCancel={handleCancel} product={update} refreshData={() => getData(currentPage, pageSize)} />
             <GlobalTable 
                 columns={columns} 
-                data={data || []} 
+                data={data} 
                 pagination={{
-                    current: params.page,
-                    pageSize: params.limit,
-                    total: data?.length || 0, 
+                    current: currentPage,
+                    pageSize: pageSize,
+                    total: totalItems,
+                    onChange: handlePageChange,
                     showSizeChanger: true,
-                    pageSizeOptions: ['2', '5', '7', '10', '12'],
-                    onChange: handleTableChange,
-                }} 
-                handleChange={handleTableChange}
+                    pageSizeOptions: [2, 5, 7, 10]
+                }}
             />
         </div>
     );

@@ -1,4 +1,4 @@
-import { Button, Form, Input, Modal } from "antd";
+import { Button, Form, Input, Modal, message } from "antd";
 import { useEffect, useState } from "react";
 import categoryService from "../../../../service/category";
 
@@ -30,7 +30,8 @@ const CategoryModal = ({ open, handleCancel, category, refreshData }) => {
                 message.success("Category created successfully");
             }
             refreshData(); // Refresh data after create/update
-            handleCancel(); 
+            handleCancel();
+            window.location.reload(); // Sahifani qayta yuklash
         } catch (error) {
             console.error(error);
             message.error("Failed to save category");
@@ -44,7 +45,10 @@ const CategoryModal = ({ open, handleCancel, category, refreshData }) => {
             open={open} 
             title={category?.name ? "Edit Category" : "Create Category"} 
             footer={null}
-            onCancel={handleCancel}  
+            onCancel={() => {
+                handleCancel();
+                window.location.reload(); // Sahifani qayta yuklash
+            }}
         >
             <Form
                 form={form}
@@ -77,4 +81,4 @@ const CategoryModal = ({ open, handleCancel, category, refreshData }) => {
     );
 };
 
-export default CategoryModal;  
+export default CategoryModal;
