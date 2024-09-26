@@ -42,7 +42,7 @@ const SignIn = () => {
                     </div>
                     <div className='w-full lg:w-1/2 flex flex-col justify-center  items-center px-4 sm:px-6 lg:px-8'>
                         <div className='w-full max-w-[460px] flex flex-col gap-1'>
-                            <h1 className='font-mono text-[28px] mb-8'>Login</h1>
+                            <h1 className='font-semibold text-[40px] mb-8'>Login</h1>
                             <Form
                                 name="login"
                                 initialValues={initialValues}
@@ -67,7 +67,7 @@ const SignIn = () => {
                                     </div>
                                 </Form.Item>
                                 <Form.Item className='text-[#000000c4]'>
-                                    <Button block type="success" htmlType="submit" className='bg-[#d45b07] text-white p-8 text-[17px]'>
+                                    <Button block type="success" htmlType="submit" className='bg-[#d45b07] text-white p-8 text-[20px]'>
                                         Log in
                                     </Button>
                                     <div className="text-center mt-2">

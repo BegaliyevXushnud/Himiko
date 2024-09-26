@@ -42,7 +42,7 @@ const SignUp = () => {
                     </div>
                     <div className='w-full lg:w-1/2 flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8'>
                         <div className='w-full max-w-[460px]'>
-                            <h1 className='font-mono text-[28px] mb-8'>Register</h1>
+                            <h1 className='font-semibold text-[40px] mb-8'>Register</h1>
                             <Form
                                 name="login"
                                 initialValues={initialValues}
