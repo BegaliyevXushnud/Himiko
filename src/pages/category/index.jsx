@@ -24,7 +24,7 @@ const Category = () => {
     const getQueryParams = () => {
         const params = new URLSearchParams(search);
         const page = params.get('page') ? parseInt(params.get('page')) : 1;
-        const limit = params.get('limit') ? parseInt(params.get('limit')) : 10;
+        const limit = params.get('limit') ? parseInt(params.get('limit')) : 5;
         return { page, limit };
     };
 

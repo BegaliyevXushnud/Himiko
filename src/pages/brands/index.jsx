@@ -3,9 +3,9 @@ import { Button, message, Input, Table } from 'antd';
 import { brandService } from '../../../service'; 
 import { useNavigate, useLocation } from 'react-router-dom';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import BrandModal from '../../component/modal/brandmodal'; // Adjust the import path as necessary
-import { GlobalPopconfirm } from '../../component'; // Adjust the import path as necessary
-// import './index.css';
+import BrandModal from '../../component/modal/brandmodal';
+import { GlobalPopconfirm } from '../../component'; 
+
 
 const { Search } = Input;
 
@@ -24,7 +24,7 @@ const Brand = () => {
     const getQueryParams = () => {
         const params = new URLSearchParams(search);
         const page = params.get('page') ? parseInt(params.get('page')) : 1;
-        const limit = params.get('limit') ? parseInt(params.get('limit')) : 10;
+        const limit = params.get('limit') ? parseInt(params.get('limit')) : 5;
         return { page, limit };
     };
 

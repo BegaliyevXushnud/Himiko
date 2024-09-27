@@ -3,7 +3,7 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 import { NavLink, useLocation,Outlet } from 'react-router-dom';
 import admin from "../../router/routes";
-import LogoImg from "../../assets/h.png"; 
+import LogoImg from "../../assets/najot.jpg"; 
 const { Header, Sider, Content } = Layout;
 
 const Admin = () => {
@@ -39,7 +39,7 @@ const Admin = () => {
                   <img 
                     src={LogoImg} 
                     alt="Logo" 
-                    className="w-10 h-auto rounded-full object-cover"  
+                    className="w-20 h-auto rounded-full object-cover"  
                   />
                 )
                 : React.createElement(item.icon),  
@@ -49,7 +49,10 @@ const Admin = () => {
                   className="text-white hover:text-white focus:text-white" 
                 >
                   {item.content === "Himiko" ? (
-                    <span className="ml-2 text-xl font-bold">Himiko</span> 
+                    
+                  
+                    <span className="ml-2 text-xl font-bold ">Himiko</span> 
+                  
                   ) : item.content}
                 </NavLink>
               ),

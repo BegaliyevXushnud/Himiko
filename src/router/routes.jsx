@@ -1,8 +1,8 @@
 import { FileProtectOutlined,TagsOutlined,SettingOutlined,StockOutlined,NotificationOutlined,TagOutlined,AppstoreOutlined } from '@ant-design/icons';
-import LogoImg from "../assets/h.png"; 
+import LogoImg from "../assets/najot.jpg"; 
 const admin = [
   {
-    content: "Himiko",
+    content: "Najot",
     path: "/admin-layout/himiko",
     icon: LogoImg,  
   },
