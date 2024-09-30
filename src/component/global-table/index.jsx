@@ -8,6 +8,7 @@ const Index = ({ columns, data, pagination, handleChange }) => (
     pagination={pagination}
     onChange={handleChange}
     bordered
+   
 />
 
 );

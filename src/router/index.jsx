@@ -1,17 +1,19 @@
 import { HashRouter, Route, Routes } from 'react-router-dom';
 import App from '../App';
-import { SignIn, SignUp, AdminLayout, Product,Category,Ads,Brands,BrandsCategory,Settings,Stock,Himiko } from '@pages';
+import { SignIn, SignUp, AdminLayout, Product, Category, Ads, Brands, BrandsCategory, Settings, Stock, Himiko } from '@pages';
+import Sub_Category from '../component/subs/sub_category'; // Ensure the path is correct
 
 export const Index = () => {
     return (
       <HashRouter>
         <Routes>
-          <Route path="/" element={<App />}>
+          <Route path="/" element={<App />} >
             <Route index element={<SignIn />} />
             <Route path="sign-up" element={<SignUp />} />
-            <Route path="admin-layout" element={<AdminLayout />}>
+            <Route path="admin-layout" element={<AdminLayout />} >
               <Route index element={<Product />} />
               <Route path="category" element={<Category />} />
+              <Route path="category/sub-category/:id" element={<Sub_Category />} /> {/* Updated to include :id */}
               <Route path="brands" element={<Brands />} />
               <Route path="brands-category" element={<BrandsCategory />} />
               <Route path="stock" element={<Stock />} />
@@ -23,6 +25,6 @@ export const Index = () => {
         </Routes>
       </HashRouter>
     );
-  };
-  
-  export default Index;
+};
+
+export default Index;

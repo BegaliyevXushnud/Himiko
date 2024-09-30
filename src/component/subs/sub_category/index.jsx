@@ -1,20 +1,20 @@
+// SubCategory.js
 import React, { useState, useEffect } from 'react';
 import { Button, message, Table, Input } from 'antd';
-import { category } from '../../../service';
+import { sub_category } from '../../../../service'; // Adjust your import path accordingly
 import { useNavigate, useLocation } from 'react-router-dom';
-import { EditOutlined, DeleteOutlined, UnorderedListOutlined } from '@ant-design/icons'; // Import new icon
-import CategoryModal from '@modals';
-import { GlobalPopconfirm } from '../../component'; // Adjust the import path as necessary
-import './index.css';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons'; 
+import SubCategoryModal from '../../../component/modal/sub_category'; // Adjust the import path as necessary
+import { GlobalPopconfirm } from '../../../component'; 
 
-const Category = () => {
+const SubCategory = () => {
     const [data, setData] = useState([]);
     const [open, setOpen] = useState(false);
     const [update, setUpdate] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
-    const [searchTerm, setSearchTerm] = useState(''); // New state for search term
+    const [searchTerm, setSearchTerm] = useState(''); 
 
     const navigate = useNavigate();
     const { search } = useLocation();
@@ -22,23 +22,24 @@ const Category = () => {
     const getQueryParams = () => {
         const params = new URLSearchParams(search);
         const page = params.get('page') ? parseInt(params.get('page')) : 1;
-        const limit = params.get('limit') ? parseInt(params.get('limit')) : 5;
+        const limit = params.get('limit') ? parseInt(params.get('limit')) : 10; // Change default limit to 10
         return { page, limit };
     };
 
     const getData = async (page = 1, limit = 10, search = '') => {
         try {
-            const res = await category.get({
+            const res = await sub_category.get({
                 params: { 
                     page, 
                     limit,
-                    search, // Include the search term in the request
+                    search, 
                 },
             });
-            setData(res?.data?.data?.categories || []);
+            setData(res?.data?.data?.subCategories || []);
             setTotalItems(res?.data?.data?.total || 0);
         } catch (err) {
             console.error(err);
+            message.error("Data fetching error occurred");
         }
     };
 
@@ -51,18 +52,18 @@ const Category = () => {
             const { page, limit } = getQueryParams();
             setCurrentPage(page);
             setPageSize(limit);
-            getData(page, limit, searchTerm); // Fetch data with search term
+            getData(page, limit, searchTerm);
         }
-    }, [navigate, search, searchTerm]); // Added searchTerm to dependency array
+    }, [navigate, search, searchTerm]);
 
     const handleDelete = async (id) => {
         try {
-            await category.delete(id);
-            message.success("Category muvaffaqiyatli o'chirildi");
-            getData(currentPage, pageSize, searchTerm); // Refresh data with search term
+            await sub_category.delete(id);
+            message.success("Sub-category muvaffaqiyatli o'chirildi");
+            getData(currentPage, pageSize, searchTerm);
         } catch (error) {
             console.error(error);
-            message.error("Categoryni o'chirishda xatolik yuz berdi");
+            message.error("Sub-categoryni o'chirishda xatolik yuz berdi");
         }
     };
 
@@ -71,20 +72,13 @@ const Category = () => {
         setOpen(true);
     };
 
-    const navigateToSubCategory = (item) => {
-        // Navigate to the sub-category page with the category ID
-        navigate(`/admin-layout/category/sub-category/${item.id}`); // Updated route to include item.id
-    };
-    
-    
-    
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
-        setCurrentPage(1); // Reset to first page on search
+        setCurrentPage(1);
         const current_params = new URLSearchParams(search);
         current_params.set('search', e.target.value);
         navigate(`?${current_params}`);
-        getData(1, pageSize, e.target.value); // Fetch data with new search term
+        getData(1, pageSize, e.target.value);
     };
 
     const columns = [
@@ -94,7 +88,7 @@ const Category = () => {
             render: (text, item, index) => (currentPage - 1) * pageSize + index + 1,
         },
         {
-            title: 'Category name',
+            title: 'Sub-category name',
             dataIndex: 'name',
             render: (text, item) => <a onClick={() => editItem(item)}>{text}</a>,
         },
@@ -103,10 +97,9 @@ const Category = () => {
             dataIndex: 'action',
             render: (text, item) => (
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <Button type="link" icon={<UnorderedListOutlined />} onClick={() => navigateToSubCategory(item)} />
                     <Button type="link" icon={<EditOutlined />} onClick={() => editItem(item)} />
                     <GlobalPopconfirm
-                        title="Categoryni o'chirishni tasdiqlaysizmi?"
+                        title="Sub-categoryni o'chirishni tasdiqlaysizmi?"
                         onConfirm={() => handleDelete(item.id)}
                     >
                         <Button type="link" danger icon={<DeleteOutlined />} />
@@ -128,11 +121,11 @@ const Category = () => {
         current_params.set('page', `${page}`);
         current_params.set('limit', `${pageSize}`);
         navigate(`?${current_params}`);
-        getData(page, pageSize, searchTerm); // Fetch data with search term
+        getData(page, pageSize, searchTerm);
     };
 
     const refreshData = () => {
-        getData(currentPage, pageSize, searchTerm); // Fetch data with search term
+        getData(currentPage, pageSize, searchTerm);
     };
 
     return (
@@ -141,9 +134,9 @@ const Category = () => {
                 <Input
                     placeholder="Search..."
                     onChange={handleSearchChange}
-                    style={{ marginBottom: '16px', width: '300px' }} // Adjust width as necessary
+                    style={{ marginBottom: '16px', width: '300px' }} 
                 />
-                <Button className="add-btn" type="primary" onClick={() => setOpen(true)}>Add New Category</Button>
+                <Button className="add-btn" type="primary" onClick={() => setOpen(true)}>Add New Sub-category</Button>
             </div>
             <Table
                 columns={columns}
@@ -159,14 +152,14 @@ const Category = () => {
                 rowKey={(item) => item.id}
             />
             
-            <CategoryModal
+            <SubCategoryModal
                 open={open}
                 handleCancel={handleCancel}
-                category={update}
+                subCategory={update}
                 refreshData={refreshData}
             />
         </div>
     );
 };
 
-export default Category;
+export default SubCategory;

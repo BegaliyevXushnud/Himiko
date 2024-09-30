@@ -1,39 +1,40 @@
+// SubCategoryModal.js
 import { Button, Form, Input, Modal, message } from "antd";
 import { useEffect, useState } from "react";
-import categoryService from "../../../../service/category";
+import subCategoryService from "../../../../service/sub_category"; // Adjust your import path accordingly
 
-const CategoryModal = ({ open, handleCancel, category, refreshData }) => {  
+const SubCategoryModal = ({ open, handleCancel, subCategory, refreshData }) => {  
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
- 
+
     useEffect(() => {
-        if (category) {
+        if (subCategory) {
             form.setFieldsValue({
-                name: category.name, 
+                name: subCategory.name,
             });
         } else {
-            form.resetFields(); // Reset fields when opening for a new category
+            form.resetFields(); // Reset fields when opening for a new sub-category
         }
-    }, [category, form]);
+    }, [subCategory, form]);
 
     const handleSubmit = async (values) => {
         setLoading(true);
         
         try {
-            if (category?.id) {
-                // Update category
-                await categoryService.update(category.id, values);
-                message.success("Category updated successfully");
+            if (subCategory?.id) {
+                // Update sub-category
+                await subCategoryService.update(subCategory.id, values);
+                message.success("Sub-category updated successfully");
             } else {
-                // Create category
-                await categoryService.create(values);
-                message.success("Category created successfully");
+                // Create sub-category
+                await subCategoryService.create(values);
+                message.success("Sub-category created successfully");
             }
             refreshData(); // Refresh data after create/update
             handleCancel();
         } catch (error) {
             console.error(error);
-            message.error("Failed to save category");
+            message.error("Failed to save sub-category");
         } finally {
             setLoading(false);
         }
@@ -42,21 +43,21 @@ const CategoryModal = ({ open, handleCancel, category, refreshData }) => {
     return (
         <Modal 
             open={open} 
-            title={category?.name ? "Edit Category" : "Create Category"} 
+            title={subCategory?.name ? "Edit Sub-category" : "Create Sub-category"} 
             footer={null}
             onCancel={handleCancel}
         >
             <Form
                 form={form}
-                name="categoryForm"
+                name="subCategoryForm"
                 style={{ width: '100%', marginTop: '20px' }}
                 onFinish={handleSubmit}
                 layout="vertical"
             >
                 <Form.Item
-                    label="Category Name"
+                    label="Sub-category Name"
                     name="name"
-                    rules={[{ required: true, message: "Please enter the category name" }]}
+                    rules={[{ required: true, message: "Please enter the sub-category name" }]}
                 >
                     <Input size="large" />
                 </Form.Item>
@@ -69,7 +70,7 @@ const CategoryModal = ({ open, handleCancel, category, refreshData }) => {
                         htmlType="submit"
                         loading={loading}
                     >
-                        {category?.name ? "Update" : "Add"}
+                        {subCategory?.name ? "Update" : "Add"}
                     </Button>
                 </Form.Item>
             </Form>
@@ -77,4 +78,4 @@ const CategoryModal = ({ open, handleCancel, category, refreshData }) => {
     );
 };
 
-export default CategoryModal;
+export default SubCategoryModal;

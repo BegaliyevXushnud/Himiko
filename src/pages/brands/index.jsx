@@ -6,7 +6,6 @@ import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import BrandModal from '../../component/modal/brandmodal';
 import { GlobalPopconfirm } from '../../component'; 
 
-
 const { Search } = Input;
 
 const Brand = () => {
@@ -31,7 +30,7 @@ const Brand = () => {
     const getData = async (page = 1, limit = 10, query = '') => {
         try {
             const res = await brandService.get({ params: { page, limit, search: query } });
-            setData(res?.data?.data?.brands || []);
+            setData(res?.data?.data?.brands || []); // brands dan ma'lumot olish
             setTotalItems(res?.data?.data?.total || 0);
         } catch (err) {
             console.error(err);
@@ -67,6 +66,10 @@ const Brand = () => {
         setOpen(true);
     };
 
+    const navigateToCategory = (id) => {
+        navigate(`/brand-category/${id}`);
+    };
+
     const columns = [
         {
             title: '№',
@@ -77,6 +80,13 @@ const Brand = () => {
             title: 'Brand Name',
             dataIndex: 'name',
             render: (text, item) => <a onClick={() => editItem(item)}>{text}</a>,
+        },
+        {
+            title: 'Image',
+            dataIndex: 'image',
+            render: (text) => (
+                <img src={text} alt="Brand" style={{ width: '50px', height: '50px' }} />
+            ),
         },
         {
             title: 'Action',
