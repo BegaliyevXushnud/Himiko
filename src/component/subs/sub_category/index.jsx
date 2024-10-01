@@ -2,12 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button, message, Table, Input } from 'antd';
 import { sub_category } from '../../../../service'; // Adjust your import path accordingly
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'; 
 import SubCategoryModal from '../../../component/modal/sub_category'; // Adjust the import path as necessary
 import { GlobalPopconfirm } from '../../../component'; 
 
 const SubCategory = () => {
+    const {id} = useParams()
     const [data, setData] = useState([]);
     const [open, setOpen] = useState(false);
     const [update, setUpdate] = useState(null);
@@ -15,7 +16,7 @@ const SubCategory = () => {
     const [pageSize, setPageSize] = useState(10);
     const [totalItems, setTotalItems] = useState(0);
     const [searchTerm, setSearchTerm] = useState(''); 
-
+    
     const navigate = useNavigate();
     const { search } = useLocation();
 
@@ -28,13 +29,7 @@ const SubCategory = () => {
 
     const getData = async (page = 1, limit = 10, search = '') => {
         try {
-            const res = await sub_category.get({
-                params: { 
-                    page, 
-                    limit,
-                    search, 
-                },
-            });
+            const res = await sub_category.get(id);
             setData(res?.data?.data?.subCategories || []);
             setTotalItems(res?.data?.data?.total || 0);
         } catch (err) {

@@ -21,15 +21,15 @@ const CategoryModal = ({ open, handleCancel, category, refreshData }) => {
         
         try {
             if (category?.id) {
-                // Update category
+            
                 await categoryService.update(category.id, values);
                 message.success("Category updated successfully");
             } else {
-                // Create category
+    
                 await categoryService.create(values);
                 message.success("Category created successfully");
             }
-            refreshData(); // Refresh data after create/update
+            refreshData(); 
             handleCancel();
         } catch (error) {
             console.error(error);

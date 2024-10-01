@@ -1,35 +1,46 @@
 .header-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    gap: 10px;
+    justify-content: space-between; /* Elementlar o'rtasida bo'sh joy */
+    align-items: center; /* Vertikal markazlash */
 }
 
-/* Ish stoli uchun qidiruv maydonining kengligini belgilash */
-.search-input {
-    width: 300px; /* Ish stoli uchun kengligi 300px */
-    display: inline-block;
+.header-container .search-input {
+    width: 300px; /* Desktopda kengligi 300px */
 }
 
-/* Qo'shimcha uslublar */
-.add-btn {
-    white-space: nowrap;
-}
-
-/* Responsiv uslublar iPad va mobil qurilmalar uchun */
-@media (max-width: 1024px) {
-    .header-container {
-        flex-direction: column; /* Kichik ekranlarda vertikal joylashuv */
-        align-items: flex-start; /* O'ngdan chapga joylashuv */
+/* Kichik ekranlarda kengligini avtomatik o'zgarishiga imkon beradi */
+@media (max-width: 768px) {
+    .header-container .search-input {
+        width: 100%; /* Mobil qurilmalarda kengligi 100% bo'ladi */
     }
+}
+.table-container {
+    overflow-x: auto; /* Kichik ekranlarda jadval uchun gorizontal aylanish */
+    margin-bottom: 16px; /* Jadval va boshqa elementlar o'rtasida bo'sh joy */
+}
 
-    .search-input {
-        width: 100%; /* Kichik ekranlarda to'liq kenglik */
-    }
+.table-container table {
+    width: 100%; /* Jadval kengligi to'liq */
+    min-width: 600px; /* Minimal kenglikni belgilash, agar kerak bo'lsa */
+}
 
-    .add-btn {
-        width: 100%; /* Kichik ekranlarda to'liq kenglik */
-        margin-top: 10px; /* O'rta joylashuv uchun oraliq */
+@media (max-width: 768px) {
+    .table-container table {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        min-width: 300px; /* Kichik ekranlarda jadvalning minimal kengligi */
     }
 }

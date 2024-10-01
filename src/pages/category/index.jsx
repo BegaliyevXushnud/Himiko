@@ -1,65 +1,59 @@
 import React, { useState, useEffect } from 'react';
-import { Button, message, Table, Input } from 'antd';
+import { Button, message, Input } from 'antd';
 import { category } from '../../../service';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { EditOutlined, DeleteOutlined, UnorderedListOutlined } from '@ant-design/icons'; // Import new icon
+import { EditOutlined, DeleteOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import CategoryModal from '@modals';
-import { GlobalPopconfirm } from '../../component'; // Adjust the import path as necessary
+import { GlobalPopconfirm } from '../../component';
+import TableComponent from '../../component/global-table'; // Use your TableComponent
 import './index.css';
 
 const Category = () => {
     const [data, setData] = useState([]);
     const [open, setOpen] = useState(false);
     const [update, setUpdate] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [totalItems, setTotalItems] = useState(0);
-    const [searchTerm, setSearchTerm] = useState(''); // New state for search term
+    const [total, setTotal] = useState(0);
+    const [params, setParams] = useState({
+        search: '',
+        page: 3,
+        limit: 3,
+    });
 
     const navigate = useNavigate();
     const { search } = useLocation();
 
-    const getQueryParams = () => {
+    useEffect(() => {
         const params = new URLSearchParams(search);
-        const page = params.get('page') ? parseInt(params.get('page')) : 1;
-        const limit = params.get('limit') ? parseInt(params.get('limit')) : 5;
-        return { page, limit };
-    };
+        let page = Number(params.get("page")) || 3;
+        let limit = Number(params.get("limit")) || 3;
+        let search_val = params.get("search") || '';
+        setParams((prev) => ({
+            ...prev,
+            page: page,
+            limit: limit,
+            search: search_val,
+        }));
+    }, [search]);
 
-    const getData = async (page = 1, limit = 10, search = '') => {
+    const getData = async () => {
         try {
-            const res = await category.get({
-                params: { 
-                    page, 
-                    limit,
-                    search, // Include the search term in the request
-                },
-            });
+            const res = await category.get(params);
             setData(res?.data?.data?.categories || []);
-            setTotalItems(res?.data?.data?.total || 0);
+            setTotal(res?.data?.data?.total || 0);
         } catch (err) {
             console.error(err);
         }
     };
 
     useEffect(() => {
-        const access_token = localStorage.getItem('access_token');
-        if (!access_token) {
-            console.error("Access token topilmadi! Bosh sahifaga yo'naltirilmoqda...");
-            navigate("/");
-        } else {
-            const { page, limit } = getQueryParams();
-            setCurrentPage(page);
-            setPageSize(limit);
-            getData(page, limit, searchTerm); // Fetch data with search term
-        }
-    }, [navigate, search, searchTerm]); // Added searchTerm to dependency array
+        getData();
+    }, [params]);
 
     const handleDelete = async (id) => {
         try {
             await category.delete(id);
             message.success("Category muvaffaqiyatli o'chirildi");
-            getData(currentPage, pageSize, searchTerm); // Refresh data with search term
+            getData();
         } catch (error) {
             console.error(error);
             message.error("Categoryni o'chirishda xatolik yuz berdi");
@@ -72,26 +66,24 @@ const Category = () => {
     };
 
     const navigateToSubCategory = (item) => {
-        // Navigate to the sub-category page with the category ID
-        navigate(`/admin-layout/category/sub-category/${item.id}`); // Updated route to include item.id
+        navigate(`/admin-layout/category/sub-category/${item.id}`);
     };
-    
-    
-    
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-        setCurrentPage(1); // Reset to first page on search
-        const current_params = new URLSearchParams(search);
-        current_params.set('search', e.target.value);
-        navigate(`?${current_params}`);
-        getData(1, pageSize, e.target.value); // Fetch data with new search term
+
+    const handleSearchChange = (event) => {
+        setParams((prev) => ({
+            ...prev,
+            search: event.target.value,
+        }));
+        const search_params = new URLSearchParams(search);
+        search_params.set("search", event.target.value);
+        navigate(`?${search_params}`);
     };
 
     const columns = [
         {
             title: '№',
             dataIndex: 'index',
-            render: (text, item, index) => (currentPage - 1) * pageSize + index + 1,
+            render: (text, item, index) => (params.page - 1) * params.limit + index + 1,
         },
         {
             title: 'Category name',
@@ -121,18 +113,23 @@ const Category = () => {
         setUpdate(null);
     };
 
-    const handlePageChange = (page, pageSize) => {
-        setCurrentPage(page);
-        setPageSize(pageSize);
-        const current_params = new URLSearchParams(search);
-        current_params.set('page', `${page}`);
-        current_params.set('limit', `${pageSize}`);
-        navigate(`?${current_params}`);
-        getData(page, pageSize, searchTerm); // Fetch data with search term
+    const handlePageChange = (pagination) => {
+        const { current =  3, pageSize = 10 } = pagination;
+
+        setParams((prev) => ({
+            ...prev,
+            page: current,
+            limit: pageSize,
+        }));
+        
+        const search_params = new URLSearchParams(search);
+        search_params.set("page", current);  // Sahifa raqamini yangilash
+        search_params.set("limit", pageSize);  // Limitni yangilash
+        navigate(`?${search_params}`);  // URL ni yangilab, sahifani qayta yuklash
     };
 
     const refreshData = () => {
-        getData(currentPage, pageSize, searchTerm); // Fetch data with search term
+        getData();
     };
 
     return (
@@ -141,24 +138,26 @@ const Category = () => {
                 <Input
                     placeholder="Search..."
                     onChange={handleSearchChange}
-                    style={{ marginBottom: '16px', width: '300px' }} // Adjust width as necessary
+                    value={params.search}
+                    className="search-input"  // Kenglik uchun class qo'shish
+                    style={{ marginBottom: '16px' }} // Mobil qurilmalardagi margin
                 />
                 <Button className="add-btn" type="primary" onClick={() => setOpen(true)}>Add New Category</Button>
             </div>
-            <Table
-                columns={columns}
-                dataSource={data}
-                pagination={{
-                    current: currentPage,
-                    pageSize: pageSize,
-                    total: totalItems,
-                    onChange: handlePageChange,
-                    showSizeChanger: true,
-                    pageSizeOptions: [2, 5, 7, 10],
-                }}
-                rowKey={(item) => item.id}
-            />
-            
+            <div className="table-container">
+                <TableComponent
+                    columns={columns}
+                    data={data}
+                    pagination={{
+                        current: params.page,
+                        pageSize: params.limit,
+                        total: total,
+                        showSizeChanger: true,
+                        pageSizeOptions: ["3", "5", "7", "10", "12"],
+                    }}
+                    handleChange={handlePageChange}
+                />
+            </div>
             <CategoryModal
                 open={open}
                 handleCancel={handleCancel}

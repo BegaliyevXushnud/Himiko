@@ -1,44 +1,55 @@
-import { Button, Form, Input, Modal, message, Upload } from "antd";
+import { Button, Form, Input, Modal, message, Upload, Select } from "antd";
 import { useEffect, useState } from "react";
-import brandService from "../../../../service/brand"; // Ensure to adjust the import path
+import brandService from "../../../../service/brand"; 
+import categoryService from "../../../../service/category"; 
 import { UploadOutlined } from '@ant-design/icons';
 
 const BrandModal = ({ open, handleCancel, brand, refreshData }) => {  
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
-    const [imageUrl, setImageUrl] = useState(null); // Rasm URL sini saqlash
+    const [imageUrl, setImageUrl] = useState(null);
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
+        // Fetch categories when modal is opened
+        const fetchCategories = async () => {
+            try {
+                const res = await categoryService.get();
+                setCategories(res?.data?.data?.categories || []);
+            } catch (err) {
+                console.error('Failed to fetch categories:', err);
+            }
+        };
+
+        if (open) fetchCategories();
+
         if (brand) {
             form.setFieldsValue({
                 name: brand.name, 
                 description: brand.description,
                 category_id: brand.category_id,
             });
-            setImageUrl(brand.image); // Rasm URL sini o'rnating
+            setImageUrl(brand.image); 
         } else {
-            form.resetFields(); // Reset fields when opening for a new brand
-            setImageUrl(null); // Yangilanganda rasm URL ni tozalash
+            form.resetFields(); 
+            setImageUrl(null); 
         }
-    }, [brand, form]);
+    }, [brand, form, open]);
 
     const handleSubmit = async (values) => {
         setLoading(true);
         
         try {
-            // Rasm yuklanganida, URL ni saqlang
             values.image = imageUrl;
 
             if (brand?.id) {
-                // Update brand
                 await brandService.update(brand.id, values);
                 message.success("Brand updated successfully");
             } else {
-                // Create brand
                 await brandService.create(values);
                 message.success("Brand created successfully");
             }
-            refreshData(); // Refresh data after create/update
+            refreshData(); 
             handleCancel();
         } catch (error) {
             console.error(error);
@@ -50,7 +61,7 @@ const BrandModal = ({ open, handleCancel, brand, refreshData }) => {
 
     const handleImageChange = (info) => {
         if (info.file.status === 'done') {
-            const url = URL.createObjectURL(info.file.originFileObj); // Rasm yuklanganidan so'ng URL yaratish
+            const url = URL.createObjectURL(info.file.originFileObj); 
             setImageUrl(url);
             message.success(`${info.file.name} file uploaded successfully`);
         } else if (info.file.status === 'error') {
@@ -79,6 +90,7 @@ const BrandModal = ({ open, handleCancel, brand, refreshData }) => {
                 >
                     <Input size="large" />
                 </Form.Item>
+
                 <Form.Item
                     label="Description"
                     name="description"
@@ -86,6 +98,7 @@ const BrandModal = ({ open, handleCancel, brand, refreshData }) => {
                 >
                     <Input size="large" />
                 </Form.Item>
+
                 <Form.Item
                     label="Image"
                     name="image"
@@ -96,17 +109,33 @@ const BrandModal = ({ open, handleCancel, brand, refreshData }) => {
                         listType="picture"
                         showUploadList={false}
                         onChange={handleImageChange}
+                        beforeUpload={() => false} // Disable automatic upload
                     >
                         <Button icon={<UploadOutlined />}>Upload Image</Button>
                     </Upload>
-                    {imageUrl && <img src={imageUrl} alt="Uploaded" style={{ marginTop: '10px', width: '100px', height: '100px' }} />} {/* Rasm ko'rsatish */}
+                    {imageUrl && (
+                        <img 
+                            src={imageUrl} 
+                            alt="Uploaded" 
+                            style={{ marginTop: '10px', width: '100px', height: '100px' }} 
+                            
+                        />
+                    )}
                 </Form.Item>
+
                 <Form.Item
-                    label="Category ID"
+                    label="Category"
                     name="category_id"
-                    rules={[{ required: true, message: "Please enter the category ID" }]}
+                    rules={[{ required: true, message: "Please select a category" }]}
                 >
-                    <Input size="large" />
+                    <Select
+                        size="large"
+                        placeholder="Select a category"
+                        options={categories.map((category) => ({
+                            label: category.name,
+                            value: category.id
+                        }))}
+                    />
                 </Form.Item>
 
                 <Form.Item>

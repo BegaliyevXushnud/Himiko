@@ -4,11 +4,10 @@ import { Table } from 'antd';
 const Index = ({ columns, data, pagination, handleChange }) => (
     <Table
     columns={columns}
-    dataSource={data?.map((item, index) => ({ ...item, key: item.id || index }))}  
+    dataSource={data}  
     pagination={pagination}
-    onChange={handleChange}
+    onChange={(pagination) => handleChange(pagination)}
     bordered
-   
 />
 
 );
