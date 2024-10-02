@@ -2,7 +2,7 @@ import { HashRouter, Route, Routes } from 'react-router-dom';
 import App from '../App';
 import { SignIn, SignUp, AdminLayout, Product, Category, Ads, Brands, BrandsCategory, Settings, Stock, Himiko } from '@pages';
 import Sub_Category from '../component/subs/sub_category'; // Ensure the path is correct
-
+import NotFound from '../component/notfound'
 export const Index = () => {
     return (
       <HashRouter>
@@ -21,6 +21,7 @@ export const Index = () => {
               <Route path="ads" element={<Ads />} />
               <Route path="himiko" element={<Himiko />} />
             </Route>
+            <Route path="*" element={<NotFound />} /> 
           </Route>
         </Routes>
       </HashRouter>
